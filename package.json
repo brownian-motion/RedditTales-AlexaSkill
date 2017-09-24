@@ -1,0 +1,9 @@
+{
+  "name": "reddittales",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "alexa-sdk": "^1.0.14",
+    "redditwrap.js": "^7.0.0"
+  }
+}
