@@ -11,6 +11,7 @@
 'use strict';
 
 const Alexa = require('alexa-sdk');
+const Reddit = require('redditwrap.js');
 
 const APP_ID = undefined;  // TODO replace with your app ID (OPTIONAL).
 
