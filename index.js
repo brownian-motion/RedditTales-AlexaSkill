@@ -11,11 +11,23 @@
 'use strict';
 
 const Alexa = require('alexa-sdk');
-const Reddit = require('redditwrap.js');
+const snoowrap = require('snoowrap');
+const credentials = require('./credentials'); // exports our credential data in a private way, off source control
+const packageInfo = require('./package.json');
+const postTools = require('./postTools');
+var emitRandomStoryPost = postTools.emitRandomStoryPost;
+
+const reddit = new snoowrap({
+    userAgent: "alexa:reddit-tales:v" + packageInfo.version,
+    clientId: credentials.clientID,
+    clientSecret: credentials.clientSecret,
+    username: credentials.username,
+    password: credentials.password
+});
 
 const APP_ID = undefined;  // TODO replace with your app ID (OPTIONAL).
 
-const StoryTypes = { DEFAULT:"random", FUNNY:"funny", SCARY:"scary" };
+const StoryTypes = {DEFAULT: "random", FUNNY: "funny", SCARY: "scary"};
 
 const languageStrings = {
     'en': {
@@ -36,20 +48,39 @@ const languageStrings = {
     }
 };
 
+function getStoryPosts(subreddit) {
+    return reddit.getSubreddit(subreddit)
+        .getHot()
+        .then(function (stories) {
+            return stories.filter(isSFW);
+        })
+        .then(function (stories) {
+            return stories.filter(isNotStickiedPost);
+        })
+        .then(function (stories) {
+            return stories.filter(isTextPost);
+        });
+}
+
 const handlers = {
     'LaunchRequest': function () {
         this.emit('ReadStory');
     },
-    'GetSubreddit': function () {
-        // Get a random subreddit from the subreddits list
-        // Use this.t() to get corresponding language data
+    'GetSubreddit': function(){
+        this.emit(':tell', "Sorry, my developer is working on that right now!");
+    },
+    'GetStory': function () {
+        // Get a random post from the appropriate subreddits
+        //TODO: handle categories at all
         const subArr = this.t('STORY_SUBS');
-        const subIndex = Math.floor(Math.random() * subArr.length);
-        const randomSub = subArr[subIndex];
+        const multireddit = subArr.map(function (sub) {
+            return sub.subreddit
+        }).join('+');
 
-        // Create speech output
-        const speechOutput = this.t('GET_SUB_MESSAGE') + randomSub;
-        this.emit(':tellWithCard', speechOutput, this.t('SKILL_NAME'), randomSub);
+        getStoryPosts(multireddit)
+            .done(function (stories) {
+                emitRandomStoryPost(stories, this);
+            })
     },
     'AMAZON.HelpIntent': function () {
         const speechOutput = this.t('HELP_MESSAGE');
@@ -62,12 +93,16 @@ const handlers = {
     'AMAZON.StopIntent': function () {
         this.emit(':tell', this.t('STOP_MESSAGE'));
     },
-    'ReadStory': function(){
-        this.emit(':tell',"Hello, world!"+this.t('STORY_SUBS')[1]);
+    'ReadStory': function () {
+        this.emit(':tell', "Hello, world!" + this.t('STORY_SUBS')[1]);
     }
 };
 
-
+function getSubredditsThatAre(category, alexa) {
+    return alexa.t('STORY_SUBS').filter(function (sub) {
+        return sub.categories.includes(category);
+    });
+}
 
 exports.handler = function (event, context) {
     const alexa = Alexa.handler(event, context);

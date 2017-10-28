@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "alexa-sdk": "^1.0.14",
-    "redditwrap.js": "^7.0.0"
+    "alexa-sdk": "^1.0.17",
+    "nodeunit": "^0.11.2",
+    "snoowrap": "^1.14.2"
   }
 }
