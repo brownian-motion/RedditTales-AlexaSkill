@@ -12,19 +12,9 @@
 
 const Alexa = require('alexa-sdk');
 const snoowrap = require('snoowrap');
-const credentials = require('./credentials'); // exports our credential data in a private way, off source control
+const reddit = require('./src/reddit-client').client; // exports our credential data in a private way, off source control
 const packageInfo = require('./package.json');
-const postTools = require('./postTools');
-var emitRandomStoryPost = postTools.emitRandomStoryPost;
-
-const reddit = new snoowrap({
-    userAgent: "alexa:reddit-tales:v" + packageInfo.version,
-    clientId: credentials.clientID,
-    clientSecret: credentials.clientSecret,
-    username: credentials.username,
-    password: credentials.password
-});
-
+const postTools = require('./src/postTools');
 const APP_ID = undefined;  // TODO replace with your app ID (OPTIONAL).
 
 const StoryTypes = {DEFAULT: "random", FUNNY: "funny", SCARY: "scary"};
@@ -48,38 +38,24 @@ const languageStrings = {
     }
 };
 
-function getStoryPosts(subreddit) {
-    return reddit.getSubreddit(subreddit)
-        .getHot()
-        .then(function (stories) {
-            return stories.filter(isSFW);
-        })
-        .then(function (stories) {
-            return stories.filter(isNotStickiedPost);
-        })
-        .then(function (stories) {
-            return stories.filter(isTextPost);
-        });
-}
-
 const handlers = {
     'LaunchRequest': function () {
         this.emit('ReadStory');
     },
-    'GetSubreddit': function(){
+    'GetSubreddit': function () {
         this.emit(':tell', "Sorry, my developer is working on that right now!");
     },
-    'GetStory': function () {
+    'ReadStory': function () {
         // Get a random post from the appropriate subreddits
         //TODO: handle categories at all
         const subArr = this.t('STORY_SUBS');
         const multireddit = subArr.map(function (sub) {
             return sub.subreddit
         }).join('+');
-
-        getStoryPosts(multireddit)
+        const alexa = this;
+        postTools.getStoryPosts(multireddit, reddit)
             .done(function (stories) {
-                emitRandomStoryPost(stories, this);
+                postTools.emitRandomStoryPostFrom(stories, alexa);
             })
     },
     'AMAZON.HelpIntent': function () {
@@ -92,9 +68,6 @@ const handlers = {
     },
     'AMAZON.StopIntent': function () {
         this.emit(':tell', this.t('STOP_MESSAGE'));
-    },
-    'ReadStory': function () {
-        this.emit(':tell', "Hello, world!" + this.t('STORY_SUBS')[1]);
     }
 };
 
