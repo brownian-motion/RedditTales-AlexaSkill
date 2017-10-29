@@ -22,15 +22,17 @@ exports.getStoryPosts = function (subreddit, reddit) {
 };
 
 exports.emitStoryPost = function emitStoryPost(story, alexa) {
-    // Create speech output
     const title = story.title;
     const author = story.author.name;
     const body = story.selftext;
-    const url = story.permalink;
+    const url = 'https://reddit.com'+story.permalink; //permalink doesn't have the reddit url
+    const subreddit = story.subreddit.display_name;
+    // Create speech output
+    const tagStripperRegex = /\^<>\\\/\[]=+"'/ig;
 
-    const cardTitle = "\"" + title + "\", by " + author;
-    const cardContent = body + "\n\n" + url;
-    const speechOutput = "By " + author + ".\n\n" + body;
+    const cardTitle = "\"" + title.replace(tagStripperRegex, ' ') + "\", by " + author + ' on ' + subreddit;
+    const cardContent = body.replace(tagStripperRegex, ' ') + "\n\n" + url;
+    const speechOutput = "By " + author + ".\n\n" + body.replace(tagStripperRegex, ' ');
 
     alexa.emit(':tellWithCard', speechOutput, cardTitle, cardContent);
 };

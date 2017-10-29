@@ -31,7 +31,7 @@ const languageStrings = {
         translation: {
             SKILL_NAME: 'Reddit Tales',
             GET_SUB_MESSAGE: 'Here\' a sub called ',
-            HELP_MESSAGE: 'You can say \"tell me a story\", or ask for something specific by saying \"tell me a ' + postTools.getRandomElementFrom(Object.values(StoryTypes)) + ' story\"... What would you like to hear?',
+            HELP_MESSAGE: 'You can say \"tell me a story\", or ask for something specific by saying \"tell me a ' + postTools.getRandomElementFrom(objectValues(StoryTypes)) + ' story\"... What would you like to hear?',
             HELP_REPROMPT: 'What would you like me to tell you?',
             STOP_MESSAGE: 'Goodbye!',
             STORY_SUBS: [
@@ -135,6 +135,10 @@ const languageStrings = {
     }
 };
 //TODO: remove EDIT comments at the ends of posts
+
+function objectValues(object){ //because Object.values isn't in node 6.10
+    return Object.keys(object).map(function(key){return object[key]});
+}
 
 const handlers = {
     'LaunchRequest': function () {
