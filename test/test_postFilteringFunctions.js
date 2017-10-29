@@ -47,7 +47,7 @@ exports.test_emittingRandomStoryFromListEmitsOne = function (test){
 function makeBarebonesPost() {
     return {
         'title': BAREBONES_TITLE,
-        'author': BAREBONES_AUTHOR,
+        'author': {name: BAREBONES_AUTHOR} ,
         'selftext': BAREBONES_SELF_TEXT,
         'permalink': BAREBONES_PERMALINK
     }
