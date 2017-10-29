@@ -28,7 +28,7 @@ exports.emitStoryPost = function emitStoryPost(story, alexa) {
     const url = 'https://reddit.com'+story.permalink; //permalink doesn't have the reddit url
     const subreddit = story.subreddit.display_name;
     // Create speech output
-    const tagStripperRegex = /\^<>\\\/\[]=+"'/ig;
+    const tagStripperRegex = /\^<>\\\/\[]=\+#/ig;
 
     const cardTitle = "\"" + title.replace(tagStripperRegex, ' ') + "\", by " + author + ' on ' + subreddit;
     const cardContent = body.replace(tagStripperRegex, ' ') + "\n\n" + url;
