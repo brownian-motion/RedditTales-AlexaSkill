@@ -134,7 +134,6 @@ const languageStrings = {
         }
     }
 };
-//TODO: remove EDIT comments at the ends of posts
 
 function objectValues(object){ //because Object.values isn't in node 6.10
     return Object.keys(object).map(function(key){return object[key]});
@@ -159,6 +158,9 @@ const handlers = {
             .done(function (stories) {
                 postTools.emitRandomStoryPostFrom(stories, alexa);
             })
+    },
+    'AMAZON.NextIntent': function(){
+        this.emit('ReadStory');
     },
     'AMAZON.HelpIntent': function () {
         const speechOutput = this.t('HELP_MESSAGE');
